@@ -2,14 +2,28 @@ from typing import Tuple, Dict
 import dotenv
 import os
 from dotenv import load_dotenv
+import requests as rq
+import json
 
-## Load Exchange API Key from environment file
+## Load Exchange API Key and API Url from environment file
 load_dotenv()
-EXCHANGERAT_API_KEY = os.getenv('EXCHANGERATE_API_KEY')
+EXCHANGERATE_API_KEY = os.getenv('EXCHANGERATE_API_KEY')
+URL_API = os.getenv('API_URL')
+
 
 def get_exchange_rate(base: str, target: str, amount: str) -> Tuple:
     """Return a tuple of (base, target, amount, conversion_result (2 decimal places))"""
-    pass
+   
+    url = f"{URL_API}/{EXCHANGERATE_API_KEY}/pair/{base}/{target}/{amount}"
+
+    response = json.loads(rq.get(url).text)
+    conversion_result = round(response['conversion_result'], 2)
+
+    return (base, target, amount, conversion_result)
+
+print(get_exchange_rate("USD", "GBP", 300))
+
+    
 
 def call_llm(textbox_input) -> Dict:
     """Make a call to the LLM with the textbox_input as the prompt.
