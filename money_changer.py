@@ -5,11 +5,21 @@ from dotenv import load_dotenv
 import requests as rq
 import json
 import streamlit as st
+from openai import OpenAI
 
 ## Load Exchange API Key and API Url from environment file
 load_dotenv()
 EXCHANGERATE_API_KEY = os.getenv('EXCHANGERATE_API_KEY')
 URL_API = os.getenv('API_URL')
+
+token = os.environ["GITHUB_TOKEN"]
+endpoint = "https://models.inference.ai.azure.com"
+model_name = "gpt-4o"
+
+client = OpenAI(
+    base_url=endpoint,
+    api_key=token,
+)
 
 
 def get_exchange_rate(base: str, target: str, amount: str) -> Tuple:
@@ -27,11 +37,28 @@ def call_llm(textbox_input) -> Dict:
     """Make a call to the LLM with the textbox_input as the prompt.
        The output from the LLM should be a JSON (dict) with the base, amount and target"""
     try:
-        completion = ...
+        response = client.chat.completions.create(
+            messages=[  
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant.",
+                },
+                {
+                    "role": "user",
+                    "content": textbox_input,
+                }
+            ],
+            temperature=1.0,
+            top_p=1.0,
+            max_tokens=1000,
+            model=model_name
+        )
+
     except Exception as e:
         print(f"Exception {e} for {text}")
     else:
-        return completion
+        return response.choices[0].message.content
+
 
 def run_pipeline():
     """Based on textbox_input, determine if you need to use the tools (function calling) for the LLM.
@@ -56,4 +83,4 @@ user_input = st.text_input("Enter the ammount and the currency")
 # Submit button
 if st.button("Submit"):
     # Display the user input below the text box
-    st.write("You entered: ", user_input)
+    st.write(call_llm(user_input))
