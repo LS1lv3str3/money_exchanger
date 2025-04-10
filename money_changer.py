@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import requests as rq
 import json
+import streamlit as st
 
 ## Load Exchange API Key and API Url from environment file
 load_dotenv()
@@ -20,9 +21,6 @@ def get_exchange_rate(base: str, target: str, amount: str) -> Tuple:
     conversion_result = round(response['conversion_result'], 2)
 
     return (base, target, amount, conversion_result)
-
-print(get_exchange_rate("USD", "GBP", 300))
-
     
 
 def call_llm(textbox_input) -> Dict:
@@ -48,3 +46,14 @@ def run_pipeline():
         st.write(f"(Function calling not used) and response from the model")
     else:
         st.write("NotImplemented")
+
+# Set the title of the app
+st.title("Multilingual Money Changer")
+
+# Create a single text box for user input
+user_input = st.text_input("Enter the ammount and the currency")
+
+# Submit button
+if st.button("Submit"):
+    # Display the user input below the text box
+    st.write("You entered: ", user_input)
